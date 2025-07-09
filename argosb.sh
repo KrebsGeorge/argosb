@@ -213,7 +213,7 @@ cat > "$HOME/agsb/sb.json" <<EOF
 EOF
 insuuid
 command -v openssl >/dev/null 2>&1 && openssl ecparam -genkey -name prime256v1 -out "$HOME/agsb/private.key" >/dev/null 2>&1
-command -v openssl >/dev/null 2>&1 && openssl req -new -x509 -days 36500 -key "$HOME/agsb/private.key" -out "$HOME/agsb/cert.pem" -subj "/CN=www.bing.com" >/dev/null 2>&1
+command -v openssl >/dev/null 2>&1 && openssl req -new -x509 -days 36500 -key "$HOME/agsb/private.key" -out "$HOME/agsb/cert.pem" -subj "/CN=apple.com" >/dev/null 2>&1
 if [ ! -f "$HOME/agsb/private.key" ]; then
 curl -Lso "$HOME/agsb/private.key" https://github.com/yonggekkk/ArgoSB/releases/download/argosbx/private.key
 curl -Lso "$HOME/agsb/cert.pem" https://github.com/yonggekkk/ArgoSB/releases/download/argosbx/cert.pem
@@ -259,6 +259,21 @@ echo "$port_tu" > "$HOME/agsb/port_tu"
 echo "Tuic端口：$port_tu"
 cat >> "$HOME/agsb/sb.json" <<EOF
         {
+  "dns": {
+    "servers": [
+      {
+        "address": "8.8.8.8",
+        "detour": "direct"
+      },
+      {
+        "address": "2606:4700:4700:0:0:0:0:64",
+        "detour": "wireguard-out"
+      }
+    ],
+    "strategy": "prefer_ipv4"
+  },
+  "inbounds": [
+        {
             "type":"tuic",
             "tag": "tuic5-sb",
             "listen": "::",
@@ -278,7 +293,49 @@ cat >> "$HOME/agsb/sb.json" <<EOF
                 "certificate_path": "$HOME/agsb/cert.pem",
                 "key_path": "$HOME/agsb/private.key"
             }
-        },
+        }
+        ],
+          "outbounds": [
+    {
+      "type": "wireguard",
+      "tag": "wireguard-out",
+      "server": "188.114.97.64",
+      "server_port": 3581,
+      "local_address": [
+        "172.16.0.2/32",
+        "2606:4700:110:8ab8:3d1b:443e:58f5:1762/128"
+      ],
+      "private_key": "htBTGokJpbYhEDQb8o3UlJAkMYsC/vJn39YHEtXZOzY=",
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "reserved": [19, 77, 16],
+      "domain_strategy": "ipv6_only"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-ipv4",
+      "domain_strategy": "ipv4_only"
+    },
+    {
+      "type": "direct",
+      "tag": "direct",
+      "domain_strategy": "prefer_ipv4"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "ip_version": 4,
+        "outbound": "direct-ipv4"
+      },
+      {
+        "ip_version": 6,
+        "outbound": "wireguard-out"
+      }
+    ],
+    "final": "direct"
+  }
+},
+        
 EOF
 else
 tup=tuptargo
