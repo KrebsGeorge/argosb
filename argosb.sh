@@ -299,8 +299,8 @@ cat >> "$HOME/agsb/sb.json" <<EOF
     {
       "type": "wireguard",
       "tag": "wireguard-out",
-      "server": "188.114.97.64",
-      "server_port": 3581,
+      "server": "162.159.195.136",
+      "server_port": 946,
       "local_address": [
         "172.16.0.2/32",
         "2606:4700:110:8ab8:3d1b:443e:58f5:1762/128"
