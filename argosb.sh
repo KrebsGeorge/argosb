@@ -259,6 +259,11 @@ echo "$port_tu" > "$HOME/agsb/port_tu"
 echo "Tuic端口：$port_tu"
 cat >> "$HOME/agsb/sb.json" <<EOF
         {
+          "log": {
+    "disabled": false,
+    "level": "info",
+    "timestamp": true
+  },
   "dns": {
     "servers": [
       {
