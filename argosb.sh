@@ -209,6 +209,17 @@ cat > "$HOME/agsb/sb.json" <<EOF
     "level": "info",
     "timestamp": true
   },
+    "dns": {
+    "servers": [
+      {
+        "address": "8.8.8.8",
+        "detour": "direct"
+      },
+      {
+        "address": "2606:4700:4700:0:0:0:0:64",
+        "detour": "wireguard-out"
+      }
+    ],
   "inbounds": [
 EOF
 insuuid
@@ -259,26 +270,6 @@ echo "$port_tu" > "$HOME/agsb/port_tu"
 echo "Tuic端口：$port_tu"
 cat >> "$HOME/agsb/sb.json" <<EOF
         {
-          "log": {
-    "disabled": false,
-    "level": "info",
-    "timestamp": true
-  },
-  "dns": {
-    "servers": [
-      {
-        "address": "8.8.8.8",
-        "detour": "direct"
-      },
-      {
-        "address": "2606:4700:4700:0:0:0:0:64",
-        "detour": "wireguard-out"
-      }
-    ],
-    "strategy": "prefer_ipv4"
-  },
-  "inbounds": [
-        {
             "type":"tuic",
             "tag": "tuic5-sb",
             "listen": "::",
@@ -298,49 +289,7 @@ cat >> "$HOME/agsb/sb.json" <<EOF
                 "certificate_path": "$HOME/agsb/cert.pem",
                 "key_path": "$HOME/agsb/private.key"
             }
-        }
-        ],
-          "outbounds": [
-    {
-      "type": "wireguard",
-      "tag": "wireguard-out",
-      "server": "162.159.195.136",
-      "server_port": 946,
-      "local_address": [
-        "172.16.0.2/32",
-        "2606:4700:110:8ab8:3d1b:443e:58f5:1762/128"
-      ],
-      "private_key": "htBTGokJpbYhEDQb8o3UlJAkMYsC/vJn39YHEtXZOzY=",
-      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-      "reserved": [19, 77, 16],
-      "domain_strategy": "ipv6_only"
-    },
-    {
-      "type": "direct",
-      "tag": "direct-ipv4",
-      "domain_strategy": "ipv4_only"
-    },
-    {
-      "type": "direct",
-      "tag": "direct",
-      "domain_strategy": "prefer_ipv4"
-    }
-  ],
-  "route": {
-    "rules": [
-      {
-        "ip_version": 4,
-        "outbound": "direct-ipv4"
-      },
-      {
-        "ip_version": 6,
-        "outbound": "wireguard-out"
-      }
-    ],
-    "final": "direct"
-  }
-},
-        
+        },
 EOF
 else
 tup=tuptargo
@@ -458,12 +407,46 @@ if [ -e "$HOME/agsb/sing-box" ]; then
 sed -i '${s/,\s*$//}' "$HOME/agsb/sb.json"
 cat >> "$HOME/agsb/sb.json" <<EOF
 ],
-"outbounds": [
-{
-"type":"direct",
-"tag":"direct"
-}
-]
+  ],
+          "outbounds": [
+    {
+      "type": "wireguard",
+      "tag": "wireguard-out",
+      "server": "162.159.195.136",
+      "server_port": 946,
+      "local_address": [
+        "172.16.0.2/32",
+        "2606:4700:110:8ab8:3d1b:443e:58f5:1762/128"
+      ],
+      "private_key": "htBTGokJpbYhEDQb8o3UlJAkMYsC/vJn39YHEtXZOzY=",
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "reserved": [19, 77, 16],
+      "domain_strategy": "ipv6_only"
+    },
+    {
+      "type": "direct",
+      "tag": "direct-ipv4",
+      "domain_strategy": "ipv4_only"
+    },
+    {
+      "type": "direct",
+      "tag": "direct",
+      "domain_strategy": "prefer_ipv4"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "ip_version": 4,
+        "outbound": "direct-ipv4"
+      },
+      {
+        "ip_version": 6,
+        "outbound": "wireguard-out"
+      }
+    ],
+    "final": "direct"
+  }
 }
 EOF
 nohup "$HOME/agsb/sing-box" run -c "$HOME/agsb/sb.json" >/dev/null 2>&1 &
