@@ -406,7 +406,6 @@ fi
 if [ -e "$HOME/agsb/sing-box" ]; then
 sed -i '${s/,\s*$//}' "$HOME/agsb/sb.json"
 cat >> "$HOME/agsb/sb.json" <<EOF
-],
   ],
           "outbounds": [
     {
